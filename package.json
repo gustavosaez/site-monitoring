@@ -1,0 +1,19 @@
+{
+  "name": "onetrust-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monitoria diária do banner de cookies OneTrust nos sites Afya",
+  "main": "scan.js",
+  "scripts": {
+    "scan": "node scan.js",
+    "scan:one": "node scan.js --site",
+    "scan:headed": "node scan.js --headed --site",
+    "postinstall": "playwright install chromium"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0"
+  }
+}
