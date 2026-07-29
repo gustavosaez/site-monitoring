@@ -1,0 +1,38 @@
+name: Monitoria OneTrust
+
+on:
+  schedule:
+    - cron: "0 8 * * *"   # 08h UTC = 05h Brasília
+  workflow_dispatch:        # permite rodar manualmente
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: |
+          pip install playwright
+          python -m playwright install chromium --with-deps
+
+      - name: Rodar varredura
+        run: python scan.py
+
+      - name: Enviar e-mail com resultado
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "Monitoria OneTrust — ${{ github.run_id }}"
+          to: ${{ secrets.MAIL_TO }}
+          from: Monitoria Afya
+          body: file://resultado.txt
