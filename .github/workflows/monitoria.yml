@@ -1,4 +1,4 @@
-name: Monitoria OneTrust
+name: Banner Monitor
 
 on:
   schedule:
