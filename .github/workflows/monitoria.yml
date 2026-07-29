@@ -3,7 +3,7 @@ name: Monitoria OneTrust
 on:
   schedule:
     - cron: "0 8 * * *"   # 08h UTC = 05h Brasília
-  workflow_dispatch:        # permite rodar manualmente
+  workflow_dispatch:
 
 jobs:
   scan:
@@ -24,15 +24,25 @@ jobs:
       - name: Rodar varredura
         run: python scan.py
 
-      - name: Enviar e-mail com resultado
-        if: always()
+      - name: Verificar se há alerta
+        id: alerta
+        run: |
+          if grep -q "Tudo ok" resultado.txt; then
+            echo "enviar=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enviar=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "HOJE=$(TZ=America/Sao_Paulo date +%d/%m/%y)" >> "$GITHUB_ENV"
+
+      - name: Enviar e-mail (somente se houver não conformidade)
+        if: steps.alerta.outputs.enviar == 'true'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: "Monitoria OneTrust — ${{ github.run_id }}"
+          subject: "Banner Monitor - ${{ env.HOJE }}"
           to: ${{ secrets.MAIL_TO }}
-          from: Monitoria Afya
-          body: file://resultado.txt
+          from: Banner Monitor
+          html_body: file://resultado.html
